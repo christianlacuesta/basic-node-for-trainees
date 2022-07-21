@@ -1,5 +1,5 @@
 const express = require('express');
-var path = require('path');
+const path = require('path');
 const bodyParser = require('body-parser');
 const sequelize = require('./helpers/database');
 
