@@ -4,10 +4,16 @@ const table = {
     organizationId: null, 
     systemId: null, 
     interfaceId: null, 
+    limit: null,
+    offset: null,
+    totalRows: null,
     rows: [],
     columns: [],
     filters: [],
-    limit: null,
-    offset: null,
+}
+
+exports.getTable = (req, res, next) => {
+
+
 }
 
