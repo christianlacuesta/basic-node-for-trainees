@@ -19,5 +19,9 @@ exports.getTable = (req, res, next) => {
 }
 
 const getColumnsConfig = () => {
+
+}
+
+const getRows = () => {
     
 }
