@@ -4,6 +4,7 @@ const table = {
     organizationId: null, 
     systemId: null, 
     interfaceId: null, 
+    name: null,
     limit: null,
     offset: null,
     totalRows: null,
@@ -17,3 +18,6 @@ exports.getTable = (req, res, next) => {
 
 }
 
+const getColumnsConfig = () => {
+    
+}
