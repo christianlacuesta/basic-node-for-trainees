@@ -17,7 +17,7 @@ exports.getTable = (req, res, next) => {
         columns: [],
     }
 
-
+    res.status(200).json(table);
 }
 
 const getColumnsConfig = () => {
