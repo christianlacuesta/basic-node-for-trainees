@@ -4,7 +4,7 @@ const WorkflowDatas = require('../../../models/workflow/workflow-data');
 const WorkflowRecords = require('../../../models/workflow/workflow-record');
 
 
-exports.getTable = (req, res, next) => {
+exports.getTable = async(req, res, next) => {
 
     const table = {
         organizationId: req.body.organizationId, 
@@ -19,14 +19,36 @@ exports.getTable = (req, res, next) => {
         columns: [],
     }
 
-    
+    const isValid = await validateParameters(table);
 
-    res.status(200).json(table);
+    if (isValid) {
+        res.status(200).json(table);
+    } else {
+
+    }
+
+
 }
 
 
 const validateParameters = (table) => {
-    return
+
+    const keys = Object.keys(table);
+
+    let invalidItems = [];
+
+    for (let i = 0; keys.length > i; i++) {
+        if (!table[keys[i]]) {
+            invalidItems.push(keys[i]);
+        }
+    }
+
+    if (invalidItems.length > 0) {
+        return false;
+    } else {
+        return true;
+    }
+
 }
 
 const getColumnsConfig = () => {
