@@ -3,6 +3,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const sequelize = require('./helpers/database');
 
+const workflowTableRoutes = require('./routes/table/workflow-table/workflow-table');
+
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'files')));
@@ -26,6 +28,8 @@ app.use((error, req, res, next) => {
     const data = error.data;
     res.status(status).json({ message: message, data: data });
 });
+
+app.use('/api/workflowtable', workflowTableRoutes);
 
 sequelize
 .sync()
