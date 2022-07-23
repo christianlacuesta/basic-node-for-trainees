@@ -1,7 +1,7 @@
 
-const Configs = require('../models/configs');
-const WorkflowDatas = require('../../models/workflow/workflow-data');
-const WorkflowRecords = require('../../models/workflow/workflow-records');
+const Configs = require('../../../models/configs');
+const WorkflowDatas = require('../../../models/workflow/workflow-data');
+const WorkflowRecords = require('../../../models/workflow/workflow-record');
 
 
 exports.getTable = (req, res, next) => {
@@ -19,7 +19,14 @@ exports.getTable = (req, res, next) => {
         columns: [],
     }
 
+    
+
     res.status(200).json(table);
+}
+
+
+const validateParameters = (table) => {
+    return
 }
 
 const getColumnsConfig = () => {
