@@ -19,12 +19,16 @@ exports.getTable = async(req, res, next) => {
         columns: [],
     }
 
+    const config = await getConfig(table);
+
+    console.log(config)
+
     const isValid = await validateParameters(table);
 
     if (isValid) {
         res.status(200).json(table);
     } else {
-
+        res.status(401).json({error: 'Invalid Parameters'});
     }
 
 
@@ -42,7 +46,7 @@ const validateParameters = (table) => {
             invalidItems.push(keys[i]);
         }
     }
-
+    console.log(invalidItems)
     if (invalidItems.length > 0) {
         return false;
     } else {
@@ -51,7 +55,7 @@ const validateParameters = (table) => {
 
 }
 
-const getColumnsConfig = () => {
+const getConfig = (table) => {
 
 }
 
