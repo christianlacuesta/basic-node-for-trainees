@@ -13,7 +13,7 @@ exports.getTable = async(req, res, next) => {
         limit: req.body.limit,
         offset: req.body.offset,
         filters: req.body.filters,
-        name: null,
+        name: req.body.name,
         totalRows: null,
         rows: [],
         columns: [],
@@ -56,7 +56,21 @@ const validateParameters = (table) => {
 }
 
 const getConfig = (table) => {
-
+    return Configs.findAll({
+        where: { 
+            organizationId: table.organizationId,
+            systemId: table.systemId,
+            interfaceId: table.interfaceId,
+            name: table.name
+        },
+    })
+    .then(configs => { 
+        
+        return configs[0].jsonData;
+    })
+    .catch(err => {
+        return err
+    });
 }
 
 const getRows = () => {
