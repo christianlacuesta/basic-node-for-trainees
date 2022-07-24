@@ -6,27 +6,15 @@ const WorkflowRecords = require('../../../models/workflow/workflow-record');
 
 exports.getTable = async(req, res, next) => {
 
-    const table = {
-        organizationId: req.body.organizationId, 
-        systemId: req.body.systemId,
-        interfaceId: req.body.interfaceId,
-        limit: req.body.limit,
-        offset: req.body.offset,
-        filters: req.body.filters,
-        name: req.body.name,
-        totalRows: null,
-        rows: [],
-        columns: [],
-    }
+    const validResponse = await validateParameters(req.body);
 
-    const config = await getConfig(table);
+    if (validResponse.isValid) {
 
-    console.log(config)
+        const config = await getConfig(validResponse.table);
 
-    const isValid = await validateParameters(table);
+        console.log(config)
 
-    if (isValid) {
-        res.status(200).json(table);
+        res.status(200).json(validResponse.table);
     } else {
         res.status(401).json({error: 'Invalid Parameters'});
     }
@@ -37,20 +25,36 @@ exports.getTable = async(req, res, next) => {
 
 const validateParameters = (table) => {
 
+    let invalidItems = [];
+
     const keys = Object.keys(table);
 
-    let invalidItems = [];
+    
 
     for (let i = 0; keys.length > i; i++) {
         if (!table[keys[i]]) {
             invalidItems.push(keys[i]);
         }
     }
-    console.log(invalidItems)
+
     if (invalidItems.length > 0) {
-        return false;
+
+        const table = {
+            organizationId: table.organizationId, 
+            systemId: table.systemId,
+            interfaceId: table.interfaceId,
+            limit: table.limit,
+            offset: tableoffset,
+            filters: table.filters,
+            name: table.name,
+            totalRows: null,
+            rows: [],
+            columns: [],
+        }
+
+        return {invalidItems: invalidItems, table: null, isValid: false};
     } else {
-        return true;
+        return {invalidItems: invalidItems, table: table, isValid: true};;
     }
 
 }
