@@ -65,8 +65,10 @@ const getConfig = (table) => {
         },
     })
     .then(configs => { 
-        
-        return configs[0].jsonData;
+
+        const selectedConfigs = configs[0].jsonData.filter(x => x.isSelected === true);
+
+        return selectedConfigs;
     })
     .catch(err => {
         return err
