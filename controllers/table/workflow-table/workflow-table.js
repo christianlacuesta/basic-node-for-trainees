@@ -6,6 +6,7 @@ const WorkflowRecords = require('../../../models/workflow/workflow-record');
 
 /*********************************************************************************************
  * A Dynamic Table creator that accepts a list of parameters and return it with table values *
+ * for basic javascript data tables that has totals, paging, user defined columns and filter *
  ********************************************************************************************/
 
 
@@ -24,9 +25,11 @@ exports.getTable = async(req, res, next) => {
         res.status(401).json({error: 'Invalid Parameters', invalidItems: validResponse.invalidItems});
     }
 
-
 }
 
+/********************************************************************************************
+ * Validate required parameters and return a json response of the required item if invalid. *
+ *******************************************************************************************/
 
 const validateParameters = (tableParams) => {
 
@@ -42,14 +45,16 @@ const validateParameters = (tableParams) => {
         invalidItems.push('interfaceId');
     } else if (typeof tableParams.name === 'undefined') {
         invalidItems.push('name');
-    } else if (typeof tableParams.name === 'undefined') {
-        invalidItems.push('name');
-    } else if (typeof tableParams.name === 'undefined') {
-        invalidItems.push('name');
+    } else if (typeof tableParams.limit === 'undefined') {
+        invalidItems.push('limit');
+    } else if (typeof tableParams.offset === 'undefined') {
+        invalidItems.push('offset');
+    } else {
+        invalidItems = [];
     }
 
     for (let i = 0; keys.length > i; i++) {
-        if (!tableParams[keys[i]]) {
+        if (tableParams[keys[i]] === null) {
             invalidItems.push(keys[i]);
         }
     }
@@ -79,6 +84,7 @@ const validateParameters = (tableParams) => {
 }
 
 const getConfig = (table) => {
+
     return Configs.findAll({
         where: { 
             organizationId: table.organizationId,
@@ -89,7 +95,7 @@ const getConfig = (table) => {
     })
     .then(configs => { 
 
-        const selectedConfigs = configs[0].jsonData.filter(x => x.isSelected === true);
+        const selectedConfigs = configs[0].jsonData.filter(x => x.selected.code === 'yes');
 
         return selectedConfigs;
     })
