@@ -7,6 +7,7 @@ const WorkflowRecords = require('../../../models/workflow/workflow-record');
 /*********************************************************************************************
  * A Dynamic Table creator that accepts a list of parameters and return it with table values *
  * for basic javascript data tables that has totals, paging, user defined columns and filter *
+ *                                      So Above, As Below                                   *
  ********************************************************************************************/
 
 
@@ -18,7 +19,11 @@ exports.getTable = async(req, res, next) => {
 
         const config = await getConfig(validResponse.table);
 
-        console.log(config)
+        const columnsResponse = await getColumns(validResponse, config);
+
+        const rowsResponse = await getRows(columnsResponse, config);
+
+        //console.log(columnsResponse)
 
         res.status(200).json(validResponse.table);
     } else {
@@ -104,6 +109,60 @@ const getConfig = (table) => {
     });
 }
 
-const getRows = () => {
+const getColumns = (validResponse, config) => {
 
+    const validResponseCopy = JSON.parse(JSON.stringify(validResponse));
+    const configCopy = JSON.parse(JSON.stringify(config));
+
+    configCopy.sort((a, b) => a.position > b.position ? -1 : 1);
+
+    let newColumns = [];
+
+    for (let i = 0; configCopy.length > i; i++) {
+        newColumns.push(configCopy[i].label);
+    }
+
+    validResponseCopy.table.columns = newColumns;
+
+    return validResponseCopy;
+}
+
+const getRows = (columnsResponse, config) => {
+
+    const configCopy = JSON.parse(JSON.stringify(config));
+
+    let newColumnNames = [];
+
+    for (let i = 0; configCopy.length > i; i++) {
+        newColumnNames.push(configCopy[i].name);
+    }
+
+    console.log(columnsResponse.table.filter)
+
+    WorkflowDatas.findAll({
+        attribute: ['recordId', 'interfaceId', 'systemId', 'organizationId', 'name', 'label', 'value'],
+        where: {
+        organizationId: columnsResponse.table.organizationId,
+        systemId: columnsResponse.table.systemId,
+        interfaceId: columnsResponse.table.interfaceId,
+        name: newColumnNames
+        },
+        limit: columnsResponse.table.limit,
+        offset: columnsResponse.table.offset,
+        order: [[ 'workflowDataId', 'DESC' ]]
+    })
+    .then(workflowDatas => { 
+        //console.log(workflowDatas)
+
+    }).catch(err => {
+        console.log(err)
+    });
+
+    // WorkflowRecords.findAndCountAll(tableConditions)
+    // .then(workflowRecords => { 
+
+    // })
+    // .catch(err => {
+    //     console.log(err)
+    // });
 }
