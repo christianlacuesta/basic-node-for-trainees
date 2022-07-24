@@ -192,7 +192,6 @@ const getRows = async(columnsResponse, config) => {
 const getRecordIdList = async(columnsResponse, filterKeys) => {
     let newColumnNames = [];
     let recordIdArray = [];
-    let valueFilters = [];
 
     for (let i = 0; filterKeys.length > i; i++) {
 
@@ -225,6 +224,16 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
             const recordIdArrayPromise = await getRecordDataDate(columnsResponse, filterKeys[i], 
                 new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24),
                 new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24));
+            recordIdArray = [...recordIdArray, ...recordIdArrayPromise]
+
+        }
+
+        if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'array' && columnsResponse.table.filters[i][filterKeys[i]].arrayFilter) {
+
+            const recordIdArrayPromise = await getRecordDataArray(columnsResponse, 
+                filterKeys[i],
+                columnsResponse.table.filters[i][filterKeys[i]].arrayFilter.name)
+
             recordIdArray = [...recordIdArray, ...recordIdArrayPromise]
 
         }
@@ -288,27 +297,30 @@ const getRecordDataDate = (columnsResponse, name, from, to) => {
     }).catch(err => {
         console.log(err)
     });
+
 }
 
-const getRecordDataArray = (name) => {
+const getRecordDataArray = (columnsResponse, name, choice) => {
 
     return WorkflowDatas.findAll({where: {
-        organizationId: organizationId,
-        systemId: systemId,
-        interfaceId: interfaceId,
+        organizationId: columnsResponse.table.organizationId,
+        systemId: columnsResponse.table.systemId,
+        interfaceId: columnsResponse.table.interfaceId,
         name: name
     }})
     .then(workflowDatas => { 
-
+        console.log(name)
         let recordIdList = [];
 
         for (let i = 0; workflowDatas.length > i; i++) {
-            if (workflowDatas[i].type.name === 'checkbox'&&
-                workflowDatas[i].isSelected) {
+            if (workflowDatas[i].type.name === 'checkbox'&& workflowDatas[i].isSelected) {
+
                     recordIdList.push(workflowDatas[i].recordId);
-            } else if (workflowDatas[i].type.name === 'dropdown' &&
-                       workflowDatas[i].isSelected) {
+
+            } else if (workflowDatas[i].type.name === 'dropdown' && workflowDatas[i].isSelected) {
+
                     recordIdList.push(workflowDatas[i].recordId);
+
             }
 
         }
