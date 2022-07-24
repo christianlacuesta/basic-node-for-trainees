@@ -166,6 +166,15 @@ const getRows = (columnsResponse, config) => {
                 const textFilterObj = {[Op.like]: `%${columnsResponse.table.filters[i][filterKeys[i]].value}%`};
                 valueFilters.push({value: textFilterObj});
             }
+
+            if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'date' && columnsResponse.table.filters[i][filterKeys[i]].value) {
+                const textFilterObj = {[Op.and]: [
+                    { [Op.gte]: new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24)} , 
+                    { [Op.lte]: new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24)} 
+                ]};
+                console.log(textFilterObj);
+                valueFilters.push({value: textFilterObj});
+            }
     
         }
 
@@ -178,7 +187,7 @@ const getRows = (columnsResponse, config) => {
 
         Object.assign(whereCondition, {name: newColumnNames});
     }
-
+    console.log(whereCondition)
     WorkflowDatas.findAll({
         attribute: ['recordId', 'interfaceId', 'systemId', 'organizationId', 'name', 'label', 'value'],
         where: whereCondition,
