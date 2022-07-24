@@ -213,3 +213,60 @@ const getRows = (columnsResponse, config) => {
     //     console.log(err)
     // });
 }
+
+/************************************************
+ * Filter Functions Date, String, Number Array. *
+ ***********************************************/
+
+ const getRecordDataDate = (name, from, to) => {
+
+    return WorkflowDatas.findAll({where: {
+        organizationId: organizationId,
+        systemId: systemId,
+        interfaceId: interfaceId,
+        name: name
+    }})
+    .then(workflowDatas => { 
+        let recordIdArray = [];
+        for (let i = 0; workflowDatas.length > i; i++) {
+
+            const valueDate = new Date(workflowDatas[i].value).setUTCHours(0,0,0,0) + (3600 * 1000 * 24);
+
+            if (valueDate >= from && valueDate <= to) {
+                recordIdArray.push(workflowDatas[i].recordId);
+            }
+
+        }
+
+        return recordIdArray;
+    }).catch(err => {
+        console.log(err)
+    });
+}
+
+const getRecordDataArray = (name) => {
+
+    return WorkflowDatas.findAll({where: {
+        organizationId: organizationId,
+        systemId: systemId,
+        interfaceId: interfaceId,
+        name: name
+    }})
+    .then(workflowDatas => { 
+        let recordIdArray = [];
+        for (let i = 0; workflowDatas.length > i; i++) {
+            if (workflowDatas[i].type.name === 'checkbox'&&
+                workflowDatas[i].isSelected) {
+                recordIdArray.push(workflowDatas[i].recordId);
+            } else if (workflowDatas[i].type.name === 'dropdown' &&
+                       workflowDatas[i].isSelected) {
+                recordIdArray.push(workflowDatas[i].recordId);
+            }
+
+        }
+
+        return recordIdArray;
+    }).catch(err => {
+        console.log(err)
+    });
+}
