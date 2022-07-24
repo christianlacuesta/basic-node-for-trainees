@@ -2,6 +2,7 @@
 const Configs = require('../../../models/configs');
 const WorkflowDatas = require('../../../models/workflow/workflow-data');
 const WorkflowRecords = require('../../../models/workflow/workflow-record');
+const { Op, Sequelize } = require("sequelize");
 
 
 /*********************************************************************************************
@@ -131,28 +132,65 @@ const getRows = (columnsResponse, config) => {
 
     const configCopy = JSON.parse(JSON.stringify(config));
 
-    let newColumnNames = [];
+    let filterKeys = [];
 
-    for (let i = 0; configCopy.length > i; i++) {
-        newColumnNames.push(configCopy[i].name);
+    for (let i = 0; columnsResponse.table.filters.length > i; i++) {
+        const objKeys = Object.keys(columnsResponse.table.filters[i]);
+        filterKeys.push(...objKeys);
     }
 
-    console.log(columnsResponse.table.filter)
-
-    WorkflowDatas.findAll({
-        attribute: ['recordId', 'interfaceId', 'systemId', 'organizationId', 'name', 'label', 'value'],
-        where: {
+    let whereCondition = {
         organizationId: columnsResponse.table.organizationId,
         systemId: columnsResponse.table.systemId,
         interfaceId: columnsResponse.table.interfaceId,
-        name: newColumnNames
-        },
+        name: null
+    }
+
+    let newColumnNames = [];
+
+    if (filterKeys.length > 0) {
+
+        let valueFilters = [];
+
+        for (let i = 0; filterKeys.length > i; i++) {
+
+            newColumnNames.push(filterKeys[i]);
+
+            if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'text' && columnsResponse.table.filters[i][filterKeys[i]].value) {
+                
+                const textFilterObj = {[Op.like]: `%${columnsResponse.table.filters[i][filterKeys[i]].value}%`};
+                valueFilters.push({value: textFilterObj});
+            }
+    
+            if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'number' && columnsResponse.table.filters[i][filterKeys[i]].value) {
+                const textFilterObj = {[Op.like]: `%${columnsResponse.table.filters[i][filterKeys[i]].value}%`};
+                valueFilters.push({value: textFilterObj});
+            }
+    
+        }
+
+        Object.assign(whereCondition, {name: newColumnNames}, { [Op.or]: valueFilters});
+
+    } else {
+        for (let i = 0; configCopy.length > i; i++) {
+            newColumnNames.push(configCopy[i].name);
+        }
+
+        Object.assign(whereCondition, {name: newColumnNames});
+    }
+
+    WorkflowDatas.findAll({
+        attribute: ['recordId', 'interfaceId', 'systemId', 'organizationId', 'name', 'label', 'value'],
+        where: whereCondition,
         limit: columnsResponse.table.limit,
         offset: columnsResponse.table.offset,
         order: [[ 'workflowDataId', 'DESC' ]]
     })
     .then(workflowDatas => { 
-        //console.log(workflowDatas)
+
+        for (let i = 0; workflowDatas.length > i; i++) {
+            console.log(workflowDatas[i].name, workflowDatas[i].value)
+        }
 
     }).catch(err => {
         console.log(err)
