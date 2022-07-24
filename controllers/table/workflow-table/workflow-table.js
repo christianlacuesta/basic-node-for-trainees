@@ -4,6 +4,11 @@ const WorkflowDatas = require('../../../models/workflow/workflow-data');
 const WorkflowRecords = require('../../../models/workflow/workflow-record');
 
 
+/*********************************************************************************************
+ * A Dynamic Table creator that accepts a list of parameters and return it with table values *
+ ********************************************************************************************/
+
+
 exports.getTable = async(req, res, next) => {
 
     const validResponse = await validateParameters(req.body);
@@ -16,44 +21,58 @@ exports.getTable = async(req, res, next) => {
 
         res.status(200).json(validResponse.table);
     } else {
-        res.status(401).json({error: 'Invalid Parameters'});
+        res.status(401).json({error: 'Invalid Parameters', invalidItems: validResponse.invalidItems});
     }
 
 
 }
 
 
-const validateParameters = (table) => {
+const validateParameters = (tableParams) => {
 
     let invalidItems = [];
 
-    const keys = Object.keys(table);
+    const keys = Object.keys(tableParams);
 
-    
+    if (typeof tableParams.organizationId === 'undefined') {
+        invalidItems.push('organizationId');
+    } else if (typeof tableParams.systemId === 'undefined') {
+        invalidItems.push('systemId');
+    } else if (typeof tableParams.interfaceId === 'undefined') {
+        invalidItems.push('interfaceId');
+    } else if (typeof tableParams.name === 'undefined') {
+        invalidItems.push('name');
+    } else if (typeof tableParams.name === 'undefined') {
+        invalidItems.push('name');
+    } else if (typeof tableParams.name === 'undefined') {
+        invalidItems.push('name');
+    }
 
     for (let i = 0; keys.length > i; i++) {
-        if (!table[keys[i]]) {
+        if (!tableParams[keys[i]]) {
             invalidItems.push(keys[i]);
         }
     }
 
     if (invalidItems.length > 0) {
 
+        return {invalidItems: invalidItems, table: null, isValid: false};
+
+    } else {
+
         const table = {
-            organizationId: table.organizationId, 
-            systemId: table.systemId,
-            interfaceId: table.interfaceId,
-            limit: table.limit,
-            offset: tableoffset,
-            filters: table.filters,
-            name: table.name,
+            organizationId: tableParams.organizationId, 
+            systemId: tableParams.systemId,
+            interfaceId: tableParams.interfaceId,
+            limit: tableParams.limit,
+            offset: tableParams.offset,
+            filters: tableParams.filters,
+            name: tableParams.name,
             totalRows: null,
             rows: [],
             columns: [],
         }
 
-        return {invalidItems: invalidItems, table: null, isValid: false};
-    } else {
         return {invalidItems: invalidItems, table: table, isValid: true};;
     }
 
