@@ -128,7 +128,7 @@ const getColumns = (validResponse, config) => {
     return validResponseCopy;
 }
 
-const getRows = (columnsResponse, config) => {
+const getRows = async(columnsResponse, config) => {
 
     const configCopy = JSON.parse(JSON.stringify(config));
 
@@ -148,37 +148,14 @@ const getRows = (columnsResponse, config) => {
 
     let newColumnNames = [];
 
+    let recordIdList = [];
+
     if (filterKeys.length > 0) {
 
-        let valueFilters = [];
+        const recordListResponse = await getRecordIdList(columnsResponse, filterKeys);
 
-        for (let i = 0; filterKeys.length > i; i++) {
-
-            newColumnNames.push(filterKeys[i]);
-
-            if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'text' && columnsResponse.table.filters[i][filterKeys[i]].value) {
-                
-                const textFilterObj = {[Op.like]: `%${columnsResponse.table.filters[i][filterKeys[i]].value}%`};
-                valueFilters.push({value: textFilterObj});
-            }
-    
-            if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'number' && columnsResponse.table.filters[i][filterKeys[i]].value) {
-                const textFilterObj = {[Op.like]: `%${columnsResponse.table.filters[i][filterKeys[i]].value}%`};
-                valueFilters.push({value: textFilterObj});
-            }
-
-            if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'date' && columnsResponse.table.filters[i][filterKeys[i]].value) {
-                const textFilterObj = {[Op.and]: [
-                    { [Op.gte]: new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24)} , 
-                    { [Op.lte]: new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24)} 
-                ]};
-                console.log(textFilterObj);
-                valueFilters.push({value: textFilterObj});
-            }
-    
-        }
-
-        Object.assign(whereCondition, {name: newColumnNames}, { [Op.or]: valueFilters});
+        recordIdList = recordListResponse.recordIdArray;
+        newColumnNames = recordListResponse.newColumnNames;
 
     } else {
         for (let i = 0; configCopy.length > i; i++) {
@@ -187,7 +164,7 @@ const getRows = (columnsResponse, config) => {
 
         Object.assign(whereCondition, {name: newColumnNames});
     }
-    console.log(whereCondition)
+    console.log(recordIdList)
     WorkflowDatas.findAll({
         attribute: ['recordId', 'interfaceId', 'systemId', 'organizationId', 'name', 'label', 'value'],
         where: whereCondition,
@@ -205,40 +182,109 @@ const getRows = (columnsResponse, config) => {
         console.log(err)
     });
 
-    // WorkflowRecords.findAndCountAll(tableConditions)
-    // .then(workflowRecords => { 
 
-    // })
-    // .catch(err => {
-    //     console.log(err)
-    // });
 }
 
-/************************************************
- * Filter Functions Date, String, Number Array. *
- ***********************************************/
+/****************************************
+* Get the record ids of filtered items. *
+****************************************/
 
- const getRecordDataDate = (name, from, to) => {
+const getRecordIdList = async(columnsResponse, filterKeys) => {
+    let newColumnNames = [];
+    let recordIdArray = [];
+    let valueFilters = [];
+
+    for (let i = 0; filterKeys.length > i; i++) {
+
+        newColumnNames.push(filterKeys[i]);
+
+        if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'text' && columnsResponse.table.filters[i][filterKeys[i]].value) {
+                        
+            const recordIdArrayPromise = await getRecordDataString(
+                columnsResponse, filterKeys[i], 
+                columnsResponse.table.filters[i][filterKeys[i]].value
+                );
+
+            recordIdArray = [...recordIdArray, ...recordIdArrayPromise];
+
+        }
+
+        if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'number' && columnsResponse.table.filters[i][filterKeys[i]].value) {
+
+            const recordIdArrayPromise = await getRecordDataString(
+                columnsResponse, filterKeys[i], 
+                columnsResponse.table.filters[i][filterKeys[i]].value
+                );
+
+            recordIdArray = [...recordIdArray, ...recordIdArrayPromise];
+
+        }
+
+        if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'date' && columnsResponse.table.filters[i][filterKeys[i]].value) {
+
+            const recordIdArrayPromise = await getRecordDataDate(columnsResponse, filterKeys[i], 
+                new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24),
+                new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24));
+            recordIdArray = [...recordIdArray, ...recordIdArrayPromise]
+
+        }
+
+    }
+
+    return {recordIdArray: recordIdArray, newColumnNames: newColumnNames};
+
+}
+
+/***********************************************
+* Filter Functions Date, String, Number Array. *
+***********************************************/
+
+const getRecordDataString = (columnsResponse, name, value) => {
 
     return WorkflowDatas.findAll({where: {
-        organizationId: organizationId,
-        systemId: systemId,
-        interfaceId: interfaceId,
+        organizationId: columnsResponse.table.organizationId,
+        systemId: columnsResponse.table.systemId,
+        interfaceId: columnsResponse.table.interfaceId,
+        name: name,
+        value: {[Op.like]: Sequelize.literal('UPPER(' + '\'%'+ value +'%\'' + ')')}
+    }})
+    .then(workflowDatas => { 
+
+        let recordIdList = [];
+
+        for (let i = 0; workflowDatas.length > i; i++) {
+            recordIdList.push(workflowDatas[i].recordId);
+        }
+
+        return recordIdList;
+    }).catch(err => {
+        console.log(err)
+    });
+}   
+
+const getRecordDataDate = (columnsResponse, name, from, to) => {
+
+    return WorkflowDatas.findAll({where: {
+        organizationId: columnsResponse.table.organizationId,
+        systemId: columnsResponse.table.systemId,
+        interfaceId: columnsResponse.table.interfaceId,
         name: name
     }})
     .then(workflowDatas => { 
-        let recordIdArray = [];
+
+        let recordIdList = [];
+
         for (let i = 0; workflowDatas.length > i; i++) {
 
             const valueDate = new Date(workflowDatas[i].value).setUTCHours(0,0,0,0) + (3600 * 1000 * 24);
 
             if (valueDate >= from && valueDate <= to) {
-                recordIdArray.push(workflowDatas[i].recordId);
+                recordIdList.push(workflowDatas[i].recordId);
             }
 
         }
 
-        return recordIdArray;
+        return recordIdList;
     }).catch(err => {
         console.log(err)
     });
@@ -253,19 +299,21 @@ const getRecordDataArray = (name) => {
         name: name
     }})
     .then(workflowDatas => { 
-        let recordIdArray = [];
+
+        let recordIdList = [];
+
         for (let i = 0; workflowDatas.length > i; i++) {
             if (workflowDatas[i].type.name === 'checkbox'&&
                 workflowDatas[i].isSelected) {
-                recordIdArray.push(workflowDatas[i].recordId);
+                    recordIdList.push(workflowDatas[i].recordId);
             } else if (workflowDatas[i].type.name === 'dropdown' &&
                        workflowDatas[i].isSelected) {
-                recordIdArray.push(workflowDatas[i].recordId);
+                    recordIdList.push(workflowDatas[i].recordId);
             }
 
         }
 
-        return recordIdArray;
+        return recordIdList;
     }).catch(err => {
         console.log(err)
     });
