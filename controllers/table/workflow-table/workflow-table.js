@@ -182,7 +182,7 @@ const getRows = async(columnsResponse, config) => {
 
 }
 
-const getWorkflowRecords = (columnsResponse, ) => {
+const getWorkflowRecords = (columnsResponse, recordIdList,  recordsArray) => {
 
 }
 
@@ -245,6 +245,8 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
         }
 
     }
+
+    recordIdArray.sort((a, b) => a > b ? -1 : 1);
 
     return {recordIdArray: recordIdArray, newColumnNames: newColumnNames, records: recordsArray};
 
