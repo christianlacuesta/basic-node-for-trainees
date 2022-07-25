@@ -26,7 +26,7 @@ exports.getTable = async(req, res, next) => {
 
         //console.log(columnsResponse)
 
-        res.status(200).json(validResponse.table);
+        res.status(200).json(columnsResponse.table);
     } else {
         res.status(401).json({error: 'Invalid Parameters', invalidItems: validResponse.invalidItems});
     }
@@ -224,6 +224,7 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
             const recordIdArrayPromise = await getRecordDataDate(columnsResponse, filterKeys[i], 
                 new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24),
                 new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24));
+                console.log(recordIdArrayPromise)
             recordIdArray = [...recordIdArray, ...recordIdArrayPromise]
 
         }
@@ -248,15 +249,21 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
 * Filter Functions Date, String, Number Array. *
 ***********************************************/
 
-const getRecordDataString = (columnsResponse, name, value) => {
+const workflowFilterAttributes = ['workflowDataId', 'recordId', 'interfaceId', 'systemId', 'organizationId', 'name', 'label', 'value', 'type'];
 
-    return WorkflowDatas.findAll({where: {
+const getRecordDataString = (columnsResponse, name, value) => {
+    return WorkflowDatas.findAll({
+        attributes: workflowFilterAttributes,
+        where: {
         organizationId: columnsResponse.table.organizationId,
         systemId: columnsResponse.table.systemId,
         interfaceId: columnsResponse.table.interfaceId,
         name: name,
         value: {[Op.like]: Sequelize.literal('UPPER(' + '\'%'+ value +'%\'' + ')')}
-    }})
+        },
+        limit: columnsResponse.table.limit,
+        offset: columnsResponse.table.offset,
+    })
     .then(workflowDatas => { 
 
         let recordIdList = [];
@@ -273,12 +280,17 @@ const getRecordDataString = (columnsResponse, name, value) => {
 
 const getRecordDataDate = (columnsResponse, name, from, to) => {
 
-    return WorkflowDatas.findAll({where: {
+    return WorkflowDatas.findAll({
+        attributes: workflowFilterAttributes,
+        where: {
         organizationId: columnsResponse.table.organizationId,
         systemId: columnsResponse.table.systemId,
         interfaceId: columnsResponse.table.interfaceId,
-        name: name
-    }})
+        name: name,
+        limit: columnsResponse.table.limit,
+        offset: columnsResponse.table.offset,
+        }
+    })
     .then(workflowDatas => { 
 
         let recordIdList = [];
@@ -302,12 +314,17 @@ const getRecordDataDate = (columnsResponse, name, from, to) => {
 
 const getRecordDataArray = (columnsResponse, name, choice) => {
 
-    return WorkflowDatas.findAll({where: {
+    return WorkflowDatas.findAll({
+        attributes: workflowFilterAttributes,
+        where: {
         organizationId: columnsResponse.table.organizationId,
         systemId: columnsResponse.table.systemId,
         interfaceId: columnsResponse.table.interfaceId,
-        name: name
-    }})
+        name: name,
+        limit: columnsResponse.table.limit,
+        offset: columnsResponse.table.offset,
+        }
+    })
     .then(workflowDatas => { 
         console.log(name)
         let recordIdList = [];
