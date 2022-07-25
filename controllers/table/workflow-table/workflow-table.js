@@ -192,24 +192,43 @@ const getWorkflowRecords = async(columnsResponse, recordIdList,  recordsArray) =
     let commonFilters = await commonFiltersFunction(columnsResponse.table);
     delete commonFilters.name;
 
+    if (recordIdList.length > 0) { Object.assign(commonFilters, {recordId: recordIdList}) };
+
     for (let i = 0; columnsResponse.table.filters.length > i; i++) {
 
         const key = Object.keys(columnsResponse.table.filters[i])[0];
 
         if (key === 'recordId') {
 
-        } else if (key === 'activeStep' || key === 'stepStatus') {
+            Object.assign(commonFilters, {recordId: {[Op.like]: Sequelize.literal('UPPER(' + '\'%'+ columnsResponse.table.filters[i][key].value +'%\'' + ')')}});
 
-        } else if (key === 'createdAt' || key === 'updatedAt') {
+        } else if (key === 'activeStep') {
+
+            const filterObj = {[key]: { name: columnsResponse.table.filters[i][key].arrayFilter.name } };
+
+            console.log(filterObj)
+
+        } else if (key === 'stepStatus') { 
+
+            const filterObj = {[key]: { name: columnsResponse.table.filters[i][key].arrayFilter.name } };
+
+        } else if (key === 'createdAt') {
+
+
+
+        } else if (key === 'updatedAt') {
+
+
 
         }
 
     }
 
-    WorkflowRecords.findAndCountAll({
+    return WorkflowRecords.findAndCountAll({
         where: commonFilters,
         limit: columnsResponse.table.limit,
         offset: columnsResponse.table.offset,
+        order: [ [ 'recordId', 'DESC' ]],
     })
     .then(workflowRecords => { 
 
@@ -235,10 +254,13 @@ const getWorkflowRecords = async(columnsResponse, recordIdList,  recordsArray) =
         }
 
 
-        console.log(workflowRecordsData);
+        return {workflowRecordsData: workflowRecordsData, error: null};
+
     })
     .catch(err => {
-        console.log(err)
+
+        return {workflowRecordsData: workflowRecordsData, error: err};
+
     });
 
 }
@@ -258,10 +280,7 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
 
         if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'text' && columnsResponse.table.filters[i][filterKeys[i]].value) {
                         
-            const recordIdArrayPromise = await getRecordDataString(
-                columnsResponse, filterKeys[i], 
-                columnsResponse.table.filters[i][filterKeys[i]].value
-                );
+            const recordIdArrayPromise = await getRecordDataString(columnsResponse, filterKeys[i], columnsResponse.table.filters[i][filterKeys[i]].value);
 
             recordIdArray = [...recordIdArray, ...recordIdArrayPromise.recordIdList];
             recordsArray = [...recordIdArray, ...recordIdArrayPromise.records];
@@ -269,10 +288,7 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
 
         if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'number' && columnsResponse.table.filters[i][filterKeys[i]].value) {
 
-            const recordIdArrayPromise = await getRecordDataString(
-                columnsResponse, filterKeys[i], 
-                columnsResponse.table.filters[i][filterKeys[i]].value
-                );
+            const recordIdArrayPromise = await getRecordDataString(columnsResponse, filterKeys[i], columnsResponse.table.filters[i][filterKeys[i]].value);
 
             recordIdArray = [...recordIdArray, ...recordIdArrayPromise.recordIdList];
             recordsArray = [...recordIdArray, ...recordIdArrayPromise.records];
@@ -292,9 +308,7 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
 
         if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'array' && columnsResponse.table.filters[i][filterKeys[i]].arrayFilter) {
 
-            const recordIdArrayPromise = await getRecordDataArray(columnsResponse, 
-                filterKeys[i],
-                columnsResponse.table.filters[i][filterKeys[i]].arrayFilter.name);
+            const recordIdArrayPromise = await getRecordDataArray(columnsResponse, filterKeys[i], columnsResponse.table.filters[i][filterKeys[i]].arrayFilter.name);
 
             recordIdArray = [...recordIdArray, ...recordIdArrayPromise.recordIdList];
             recordsArray = [...recordIdArray, ...recordIdArrayPromise.records];
