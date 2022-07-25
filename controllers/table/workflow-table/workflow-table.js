@@ -89,15 +89,27 @@ const validateParameters = (tableParams) => {
 
 }
 
-const getConfig = (table) => {
+/***************************
+ * Common Filter function. *
+ **************************/
+
+const commonFiltersFunction = (table) => {
+    const commonWhereFilters = { 
+        organizationId: table.organizationId,
+        systemId: table.systemId,
+        interfaceId: table.interfaceId,
+        name: table.name
+    };
+
+    return commonWhereFilters;
+}
+
+const getConfig = async(table) => {
+
+    const commonFilters = await commonFiltersFunction(table);
 
     return Configs.findAll({
-        where: { 
-            organizationId: table.organizationId,
-            systemId: table.systemId,
-            interfaceId: table.interfaceId,
-            name: table.name
-        },
+        where: commonFilters,
     })
     .then(configs => { 
 
@@ -106,7 +118,9 @@ const getConfig = (table) => {
         return selectedConfigs;
     })
     .catch(err => {
-        return err
+
+        return err;
+
     });
 }
 
@@ -139,12 +153,9 @@ const getRows = async(columnsResponse, config) => {
         filterKeys.push(...objKeys);
     }
 
-    let whereCondition = {
-        organizationId: columnsResponse.table.organizationId,
-        systemId: columnsResponse.table.systemId,
-        interfaceId: columnsResponse.table.interfaceId,
-        name: null
-    }
+    const commonFilters = await commonFiltersFunction(columnsResponse.table);
+
+    let whereCondition = commonFilters;
 
     let newColumnNames = [];
     let recordIdList = [];
@@ -171,9 +182,13 @@ const getRows = async(columnsResponse, config) => {
 
 }
 
-/****************************************
-* Get the record ids of filtered items. *
-****************************************/
+const getWorkflowRecords = (columnsResponse, ) => {
+
+}
+
+/***********************************************************
+* Get the record ids of filtered items from workflow data. *
+***********************************************************/
 
 const getRecordIdList = async(columnsResponse, filterKeys) => {
     let newColumnNames = [];
@@ -241,16 +256,14 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
 
 const workflowFilterAttributes = ['workflowDataId', 'recordId', 'interfaceId', 'systemId', 'organizationId', 'name', 'label', 'value', 'type'];
 
-const getRecordDataString = (columnsResponse, name, value) => {
+const getRecordDataString = async(columnsResponse, name, value) => {
+
+    let commonFilters = await commonFiltersFunction(columnsResponse.table);
+    Object.assign(commonFilters, {name: name, value: {[Op.like]: Sequelize.literal('UPPER(' + '\'%'+ value +'%\'' + ')')}});
+
     return WorkflowDatas.findAll({
         attributes: workflowFilterAttributes,
-        where: {
-        organizationId: columnsResponse.table.organizationId,
-        systemId: columnsResponse.table.systemId,
-        interfaceId: columnsResponse.table.interfaceId,
-        name: name,
-        value: {[Op.like]: Sequelize.literal('UPPER(' + '\'%'+ value +'%\'' + ')')}
-        },
+        where: commonFilters,
         limit: columnsResponse.table.limit,
         offset: columnsResponse.table.offset,
     })
@@ -258,23 +271,23 @@ const getRecordDataString = (columnsResponse, name, value) => {
 
         const recordIdList = workflowDatas.map(a => a.recordId);
 
-        return {recordIdList: recordIdList, records: workflowDatas};
+        return {recordIdList: recordIdList, records: workflowDatas, error: null};
 
     }).catch(err => {
-        console.log(err)
+
+        return {recordIdList: recordIdList, records: workflowDatas, error: err};
+
     });
 }   
 
-const getRecordDataDate = (columnsResponse, name, from, to) => {
+const getRecordDataDate = async(columnsResponse, name, from, to) => {
+
+    let commonFilters = await commonFiltersFunction(columnsResponse.table);
+    Object.assign(commonFilters, {name: name});
 
     return WorkflowDatas.findAll({
         attributes: workflowFilterAttributes,
-        where: {
-        organizationId: columnsResponse.table.organizationId,
-        systemId: columnsResponse.table.systemId,
-        interfaceId: columnsResponse.table.interfaceId,
-        name: name,
-        }
+        where: commonFilters
     })
     .then(workflowDatas => { 
 
@@ -290,27 +303,27 @@ const getRecordDataDate = (columnsResponse, name, from, to) => {
 
         }
 
-        return {recordIdList: recordIdList, records: workflowDatas};
+        return {recordIdList: recordIdList, records: workflowDatas, error: null};
 
     }).catch(err => {
-        console.log(err)
+
+        return {recordIdList: recordIdList, records: workflowDatas, error: err};
+
     });
 
 }
 
-const getRecordDataArray = (columnsResponse, name, choice) => {
+const getRecordDataArray = async(columnsResponse, name, choice) => {
+
+    let commonFilters = await commonFiltersFunction(columnsResponse.table);
+    Object.assign(commonFilters, {name: name});
 
     return WorkflowDatas.findAll({
         attributes: workflowFilterAttributes,
-        where: {
-        organizationId: columnsResponse.table.organizationId,
-        systemId: columnsResponse.table.systemId,
-        interfaceId: columnsResponse.table.interfaceId,
-        name: name,
-        }
+        where: commonFilters
     })
     .then(workflowDatas => { 
-        console.log(name)
+
         let recordIdList = [];
 
         for (let i = 0; workflowDatas.length > i; i++) {
@@ -326,9 +339,11 @@ const getRecordDataArray = (columnsResponse, name, choice) => {
 
         }
 
-        return {recordIdList: recordIdList, records: workflowDatas};
+        return {recordIdList: recordIdList, records: workflowDatas, error: null};
 
     }).catch(err => {
-        console.log(err)
+
+        return {recordIdList: recordIdList, records: workflowDatas, error: err};
+
     });
 }
