@@ -24,9 +24,9 @@ exports.getTable = async(req, res, next) => {
 
         const rowsResponse = await getRows(columnsResponse, config);
 
-        //console.log(columnsResponse)
+        console.log(rowsResponse)
 
-        res.status(200).json(columnsResponse.table);
+        res.status(200).json(rowsResponse);
     } else {
         res.status(401).json({error: 'Invalid Parameters', invalidItems: validResponse.invalidItems});
     }
@@ -144,6 +144,7 @@ const getColumns = (validResponse, config) => {
 
 const getRows = async(columnsResponse, config) => {
 
+    const columnsResponseCopy = JSON.parse(JSON.stringify(columnsResponse));
     const configCopy = JSON.parse(JSON.stringify(config));
 
     let filterKeys = [];
@@ -182,8 +183,9 @@ const getRows = async(columnsResponse, config) => {
 
     const workflowRecords = await getWorkflowRecords(columnsResponse, recordIdList,  recordsArray);
 
-    console.log(workflowRecords)
+    Object.assign(columnsResponseCopy.table, {rows: workflowRecords.workflowRecordsData.rows, totalRows: workflowRecords.workflowRecordsData.count});
 
+    return columnsResponseCopy;
 
 }
 
@@ -204,26 +206,37 @@ const getWorkflowRecords = async(columnsResponse, recordIdList,  recordsArray) =
 
         } else if (key === 'activeStep') {
 
-            const filterObj = {[key]: { name: columnsResponse.table.filters[i][key].arrayFilter.name } };
+            const filterObj = {[key]: columnsResponse.table.filters[i][key].arrayFilter.name };
 
-            console.log(filterObj)
+            Object.assign(commonFilters, filterObj);
 
         } else if (key === 'stepStatus') { 
 
             const filterObj = {[key]: { name: columnsResponse.table.filters[i][key].arrayFilter.name } };
 
+            Object.assign(commonFilters, filterObj);
+
         } else if (key === 'createdAt') {
 
+            const filterObj = {[Op.and]: [
+                { [Op.gte]: new Date(columnsResponse.table.filters[i][key].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24)} , 
+                { [Op.lte]: new Date(columnsResponse.table.filters[i][key].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24)} 
+            ]};
 
+            Object.assign(commonFilters, {[key]: filterObj});
 
         } else if (key === 'updatedAt') {
 
+            const filterObj = {[Op.and]: [
+                { [Op.gte]: new Date(columnsResponse.table.filters[i][key].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24)} , 
+                { [Op.lte]: new Date(columnsResponse.table.filters[i][key].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24)} 
+            ]};
 
+            Object.assign(commonFilters, {[key]: filterObj});
 
         }
 
     }
-
     return WorkflowRecords.findAndCountAll({
         where: commonFilters,
         limit: columnsResponse.table.limit,
@@ -259,7 +272,7 @@ const getWorkflowRecords = async(columnsResponse, recordIdList,  recordsArray) =
     })
     .catch(err => {
 
-        return {workflowRecordsData: workflowRecordsData, error: err};
+        return {workflowRecordsData: null, error: err};
 
     });
 
