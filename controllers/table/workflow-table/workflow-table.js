@@ -147,8 +147,8 @@ const getRows = async(columnsResponse, config) => {
     }
 
     let newColumnNames = [];
-
     let recordIdList = [];
+    let recordsArray = [];
 
     if (filterKeys.length > 0) {
 
@@ -156,6 +156,7 @@ const getRows = async(columnsResponse, config) => {
 
         recordIdList = recordListResponse.recordIdArray;
         newColumnNames = recordListResponse.newColumnNames;
+        recordsArray = recordListResponse.records;
 
     } else {
         for (let i = 0; configCopy.length > i; i++) {
@@ -164,23 +165,8 @@ const getRows = async(columnsResponse, config) => {
 
         Object.assign(whereCondition, {name: newColumnNames});
     }
-    console.log(recordIdList)
-    WorkflowDatas.findAll({
-        attribute: ['recordId', 'interfaceId', 'systemId', 'organizationId', 'name', 'label', 'value'],
-        where: whereCondition,
-        limit: columnsResponse.table.limit,
-        offset: columnsResponse.table.offset,
-        order: [[ 'workflowDataId', 'DESC' ]]
-    })
-    .then(workflowDatas => { 
 
-        for (let i = 0; workflowDatas.length > i; i++) {
-            console.log(workflowDatas[i].name, workflowDatas[i].value)
-        }
-
-    }).catch(err => {
-        console.log(err)
-    });
+    console.log(recordsArray)
 
 
 }
@@ -192,6 +178,7 @@ const getRows = async(columnsResponse, config) => {
 const getRecordIdList = async(columnsResponse, filterKeys) => {
     let newColumnNames = [];
     let recordIdArray = [];
+    let recordsArray = [];
 
     for (let i = 0; filterKeys.length > i; i++) {
 
@@ -204,8 +191,8 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
                 columnsResponse.table.filters[i][filterKeys[i]].value
                 );
 
-            recordIdArray = [...recordIdArray, ...recordIdArrayPromise];
-
+            recordIdArray = [...recordIdArray, ...recordIdArrayPromise.recordIdList];
+            recordsArray = [...recordIdArray, ...recordIdArrayPromise.records];
         }
 
         if (filterKeys[i] && columnsResponse.table.filters[i][filterKeys[i]].type === 'number' && columnsResponse.table.filters[i][filterKeys[i]].value) {
@@ -215,7 +202,8 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
                 columnsResponse.table.filters[i][filterKeys[i]].value
                 );
 
-            recordIdArray = [...recordIdArray, ...recordIdArrayPromise];
+            recordIdArray = [...recordIdArray, ...recordIdArrayPromise.recordIdList];
+            recordsArray = [...recordIdArray, ...recordIdArrayPromise.records];
 
         }
 
@@ -225,7 +213,8 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
                 new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24),
                 new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24));
 
-            recordIdArray = [...recordIdArray, ...recordIdArrayPromise]
+            recordIdArray = [...recordIdArray, ...recordIdArrayPromise.recordIdList];
+            recordsArray = [...recordIdArray, ...recordIdArrayPromise.records];
 
         }
 
@@ -233,15 +222,16 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
 
             const recordIdArrayPromise = await getRecordDataArray(columnsResponse, 
                 filterKeys[i],
-                columnsResponse.table.filters[i][filterKeys[i]].arrayFilter.name)
+                columnsResponse.table.filters[i][filterKeys[i]].arrayFilter.name);
 
-            recordIdArray = [...recordIdArray, ...recordIdArrayPromise]
+            recordIdArray = [...recordIdArray, ...recordIdArrayPromise.recordIdList];
+            recordsArray = [...recordIdArray, ...recordIdArrayPromise.records];
 
         }
 
     }
 
-    return {recordIdArray: recordIdArray, newColumnNames: newColumnNames};
+    return {recordIdArray: recordIdArray, newColumnNames: newColumnNames, records: recordsArray};
 
 }
 
@@ -266,13 +256,10 @@ const getRecordDataString = (columnsResponse, name, value) => {
     })
     .then(workflowDatas => { 
 
-        let recordIdList = [];
+        const recordIdList = workflowDatas.map(a => a.recordId);
 
-        for (let i = 0; workflowDatas.length > i; i++) {
-            recordIdList.push(workflowDatas[i].recordId);
-        }
+        return {recordIdList: recordIdList, records: workflowDatas};
 
-        return recordIdList;
     }).catch(err => {
         console.log(err)
     });
@@ -303,7 +290,8 @@ const getRecordDataDate = (columnsResponse, name, from, to) => {
 
         }
 
-        return recordIdList;
+        return {recordIdList: recordIdList, records: workflowDatas};
+
     }).catch(err => {
         console.log(err)
     });
@@ -338,7 +326,8 @@ const getRecordDataArray = (columnsResponse, name, choice) => {
 
         }
 
-        return recordIdList;
+        return {recordIdList: recordIdList, records: workflowDatas};
+
     }).catch(err => {
         console.log(err)
     });
