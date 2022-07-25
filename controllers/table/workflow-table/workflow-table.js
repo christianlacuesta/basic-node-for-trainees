@@ -170,19 +170,76 @@ const getRows = async(columnsResponse, config) => {
         recordsArray = recordListResponse.records;
 
     } else {
+
         for (let i = 0; configCopy.length > i; i++) {
             newColumnNames.push(configCopy[i].name);
         }
 
         Object.assign(whereCondition, {name: newColumnNames});
+
+
     }
 
-    console.log(recordsArray)
+    const workflowRecords = await getWorkflowRecords(columnsResponse, recordIdList,  recordsArray);
+
+    console.log(workflowRecords)
 
 
 }
 
-const getWorkflowRecords = (columnsResponse, recordIdList,  recordsArray) => {
+const getWorkflowRecords = async(columnsResponse, recordIdList,  recordsArray) => {
+
+    let commonFilters = await commonFiltersFunction(columnsResponse.table);
+    delete commonFilters.name;
+
+    for (let i = 0; columnsResponse.table.filters.length > i; i++) {
+
+        const key = Object.keys(columnsResponse.table.filters[i])[0];
+
+        if (key === 'recordId') {
+
+        } else if (key === 'activeStep' || key === 'stepStatus') {
+
+        } else if (key === 'createdAt' || key === 'updatedAt') {
+
+        }
+
+    }
+
+    WorkflowRecords.findAndCountAll({
+        where: commonFilters,
+        limit: columnsResponse.table.limit,
+        offset: columnsResponse.table.offset,
+    })
+    .then(workflowRecords => { 
+
+        let rows = JSON.parse(JSON.stringify(workflowRecords.rows));
+
+        rows.forEach(function(x){delete x.fileData});
+
+        let workflowRecordsData = {
+            count: workflowRecords.count,
+            rows: rows,
+            fileDataHeaders: []
+        };
+
+        for (let i = 0; workflowRecords.rows.length > i; i++) {
+            if (workflowRecords.rows[i].fileData.length > 0) {
+                for (let j = 0; workflowRecords.rows[i].fileData.length > j; j++) {
+                    if (workflowRecords.rows[i].fileData[j].value) {
+                        Object.assign(workflowRecordsData.rows[i], {[workflowRecords.rows[i].fileData[j].name]: workflowRecords.rows[i].fileData[j].value});
+                        workflowRecordsData.fileDataHeaders.push(workflowRecords.rows[i].fileData[j].name);
+                    }
+                }
+            }
+        }
+
+
+        console.log(workflowRecordsData);
+    })
+    .catch(err => {
+        console.log(err)
+    });
 
 }
 
