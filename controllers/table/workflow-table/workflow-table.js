@@ -224,7 +224,7 @@ const getRecordIdList = async(columnsResponse, filterKeys) => {
             const recordIdArrayPromise = await getRecordDataDate(columnsResponse, filterKeys[i], 
                 new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateFrom).setUTCHours(0,0,0,0) + (3600 * 1000 * 24),
                 new Date(columnsResponse.table.filters[i][filterKeys[i]].value.dateTo).setUTCHours(23,59,59,999) + (3600 * 1000 * 24));
-                console.log(recordIdArrayPromise)
+
             recordIdArray = [...recordIdArray, ...recordIdArrayPromise]
 
         }
@@ -287,8 +287,6 @@ const getRecordDataDate = (columnsResponse, name, from, to) => {
         systemId: columnsResponse.table.systemId,
         interfaceId: columnsResponse.table.interfaceId,
         name: name,
-        limit: columnsResponse.table.limit,
-        offset: columnsResponse.table.offset,
         }
     })
     .then(workflowDatas => { 
@@ -321,8 +319,6 @@ const getRecordDataArray = (columnsResponse, name, choice) => {
         systemId: columnsResponse.table.systemId,
         interfaceId: columnsResponse.table.interfaceId,
         name: name,
-        limit: columnsResponse.table.limit,
-        offset: columnsResponse.table.offset,
         }
     })
     .then(workflowDatas => { 
