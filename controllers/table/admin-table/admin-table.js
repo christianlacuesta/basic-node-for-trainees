@@ -1,5 +1,6 @@
 
-const Configs = require('../../../models/admin-models/config-model/configs');
+const Shared = require('../../../controllers/table/shared/shared');
+const { Op, Sequelize } = require("sequelize");
 
 /********************************************
  * Below is the list of Admin Table Models. *
@@ -25,9 +26,10 @@ exports.getAdminTable = async(req, res, next) => {
 
     if (validResponse.isValid) {
 
-        const config = await getConfig(validResponse.table);
+        const config = await Shared.getConfig(validResponse.table);
 
-        console.log(config)
+        const columnsResponse = await Shared.getColumns(validResponse, config);
+        console.log(columnsResponse)
 
         res.status(200).json(validResponse);
 
@@ -53,8 +55,10 @@ const validateParameters = (tableParams) => {
         invalidItems.push('systemId');
     } else if (typeof tableParams.interfaceId === 'undefined') {
         invalidItems.push('interfaceId');
-    } else if (typeof tableParams.tableName === 'undefined') {
-        invalidItems.push('tableName');
+    } else if (typeof tableParams.name === 'undefined') {
+        invalidItems.push('name');
+    } else if (typeof tableParams.category === 'undefined') {
+        invalidItems.push('category');
     } else if (typeof tableParams.limit === 'undefined') {
         invalidItems.push('limit');
     } else if (typeof tableParams.offset === 'undefined') {
@@ -80,7 +84,7 @@ const validateParameters = (tableParams) => {
             organizationId: tableParams.organizationId, 
             systemId: tableParams.systemId,
             interfaceId: tableParams.interfaceId,
-            tableName: tableParams.tableName,
+            name: tableParams.name,
             limit: tableParams.limit,
             offset: tableParams.offset,
             columns: [],
@@ -91,10 +95,6 @@ const validateParameters = (tableParams) => {
 
         return {invalidItems: invalidItems, table: table, isValid: true};;
     }
-}
-
-const getConfig = async(table) => {
-    
 }
 
 const setAdminTable = () => {

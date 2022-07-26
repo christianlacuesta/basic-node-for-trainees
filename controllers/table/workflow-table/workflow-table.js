@@ -1,5 +1,4 @@
 
-const Configs = require('../../../models/admin-models/config-model/configs');
 const WorkflowDatas = require('../../../models/workflow-models/workflow-data');
 const WorkflowRecords = require('../../../models/workflow-models/workflow-record');
 const Shared = require('../../../controllers/table/shared/shared');
@@ -19,9 +18,9 @@ exports.getWorkflowTable = async(req, res, next) => {
 
     if (validResponse.isValid) {
 
-        const config = await getConfig(validResponse.table);
+        const config = await Shared.getConfig(validResponse.table);
 
-        const columnsResponse = await getColumns(validResponse, config);
+        const columnsResponse = await Shared.getColumns(validResponse, config);
 
         const rowsResponse = await getRows(columnsResponse, config);
 
@@ -89,52 +88,6 @@ const validateParameters = (tableParams) => {
         return {invalidItems: invalidItems, table: table, isValid: true};;
     }
 
-}
-
-/***********************************************************************************************************
-* Function for getting the columns configuration of the table under config table with the column jsonData. *
-***********************************************************************************************************/
-
-const getConfig = async(table) => {
-
-    const commonFilters = await Shared.commonFiltersFunction(table);
-
-    return Configs.findAll({
-        where: commonFilters,
-    })
-    .then(configs => { 
-
-        const selectedConfigs = configs[0].jsonData.filter(x => x.selected.code === 'yes');
-
-        return selectedConfigs;
-    })
-    .catch(err => {
-
-        return err;
-
-    });
-}
-
-/*******************************************************************************************
-* Function for setting the columns and sorting them accosrding to their defined positions. *
-*******************************************************************************************/
-
-const getColumns = (validResponse, config) => {
-
-    const validResponseCopy = JSON.parse(JSON.stringify(validResponse));
-    const configCopy = JSON.parse(JSON.stringify(config));
-
-    configCopy.sort((a, b) => a.position > b.position ? -1 : 1);
-
-    let newColumns = [];
-
-    for (let i = 0; configCopy.length > i; i++) {
-        newColumns.push(configCopy[i].label);
-    }
-
-    validResponseCopy.table.columns = newColumns;
-
-    return validResponseCopy;
 }
 
 /****************************************
@@ -404,7 +357,7 @@ const getRecordDataDate = async(columnsResponse, name, from, to) => {
 
 const getRecordDataArray = async(columnsResponse, name, choice) => {
 
-    let commonFilters = await commonFiltersFunction(columnsResponse.table);
+    let commonFilters = await Shared.commonFiltersFunction(columnsResponse.table);
     Object.assign(commonFilters, {name: name});
 
     return WorkflowDatas.findAll({
