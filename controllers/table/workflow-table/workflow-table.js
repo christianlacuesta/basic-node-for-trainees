@@ -8,7 +8,7 @@ const { Op, Sequelize } = require("sequelize");
 /*********************************************************************************************
  * A Dynamic Table creator that accepts a list of parameters and return it with table values *
  * for basic javascript data tables that has totals, paging, user defined columns and filter *
- *                                      So Above, As Below                                   *
+ *            Author: Christian Lacuesta * Date: 7/26/2022 So Above, As Below                *
  ********************************************************************************************/
 
 
@@ -23,8 +23,6 @@ exports.getTable = async(req, res, next) => {
         const columnsResponse = await getColumns(validResponse, config);
 
         const rowsResponse = await getRows(columnsResponse, config);
-
-        console.log(rowsResponse)
 
         res.status(200).json(rowsResponse);
     } else {
@@ -89,9 +87,9 @@ const validateParameters = (tableParams) => {
 
 }
 
-/***************************
- * Common Filter function. *
- **************************/
+/**************************
+* Common Filter function. *
+**************************/
 
 const commonFiltersFunction = (table) => {
     const commonWhereFilters = { 
@@ -103,6 +101,10 @@ const commonFiltersFunction = (table) => {
 
     return commonWhereFilters;
 }
+
+/***********************************************************************************************************
+* Function for getting the columns configuration of the table under config table with the column jsonData. *
+***********************************************************************************************************/
 
 const getConfig = async(table) => {
 
@@ -124,6 +126,10 @@ const getConfig = async(table) => {
     });
 }
 
+/*******************************************************************************************
+* Function for setting the columns and sorting them accosrding to their defined positions. *
+*******************************************************************************************/
+
 const getColumns = (validResponse, config) => {
 
     const validResponseCopy = JSON.parse(JSON.stringify(validResponse));
@@ -141,6 +147,10 @@ const getColumns = (validResponse, config) => {
 
     return validResponseCopy;
 }
+
+/****************************************
+* Function for getting the table rows . *
+****************************************/
 
 const getRows = async(columnsResponse, config) => {
 
@@ -188,6 +198,10 @@ const getRows = async(columnsResponse, config) => {
     return columnsResponseCopy;
 
 }
+
+/********************************************************************************************************************************
+* Function for getting the workflow records and iterating the filedata array as columns depending on the columns configuration. *
+********************************************************************************************************************************/
 
 const getWorkflowRecords = async(columnsResponse, recordIdList,  recordsArray) => {
 
