@@ -133,7 +133,7 @@ const setAdminTable = (columnsResponse) => {
 
    }
 
-   return table
+   table.findAndCountAll().then(workflowRecords => { console.log(workflowRecords) })
 
 }
 
