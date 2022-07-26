@@ -12,7 +12,7 @@ const { Op, Sequelize } = require("sequelize");
  ********************************************************************************************/
 
 
-exports.getTable = async(req, res, next) => {
+exports.getWorkflowTable = async(req, res, next) => {
 
     const validResponse = await validateParameters(req.body);
 
