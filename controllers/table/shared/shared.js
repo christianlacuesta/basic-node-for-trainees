@@ -15,6 +15,10 @@ exports.commonFiltersFunction = (table) => {
 
     if (table.category) {
         Object.assign(commonWhereFilters, {category: table.category});
+
+        delete commonWhereFilters.systemId;
+        delete commonWhereFilters.interfaceId;
+
     }
 
     return commonWhereFilters;
@@ -53,12 +57,16 @@ exports.getColumns = (validResponse, config) => {
     const validResponseCopy = JSON.parse(JSON.stringify(validResponse));
     const configCopy = JSON.parse(JSON.stringify(config));
 
-    configCopy.sort((a, b) => a.position > b.position ? -1 : 1);
+    if (configCopy.length > 0) {
+
+        configCopy.sort((a, b) => a.position > b.position ? -1 : 1);
+
+    }
 
     let newColumns = [];
 
     for (let i = 0; configCopy.length > i; i++) {
-        newColumns.push(configCopy[i].label);
+        newColumns.push(configCopy[i]);
     }
 
     validResponseCopy.table.columns = newColumns;

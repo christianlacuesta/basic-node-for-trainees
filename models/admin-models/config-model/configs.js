@@ -24,6 +24,10 @@ const Configs = sequelize.define('configs', {
         type: Sequelize.STRING,
         allowNull: false,
     },
+    category: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
     jsonData: {
         type: Sequelize.JSON,
         allowNull: false,

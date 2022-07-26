@@ -29,9 +29,10 @@ exports.getAdminTable = async(req, res, next) => {
         const config = await Shared.getConfig(validResponse.table);
 
         const columnsResponse = await Shared.getColumns(validResponse, config);
-        console.log(columnsResponse)
 
-        res.status(200).json(validResponse);
+        const tableResponse = await setAdminTable(columnsResponse);
+
+        res.status(200).json(columnsResponse);
 
     } else {
 
@@ -85,6 +86,7 @@ const validateParameters = (tableParams) => {
             systemId: tableParams.systemId,
             interfaceId: tableParams.interfaceId,
             name: tableParams.name,
+            category: tableParams.category,
             limit: tableParams.limit,
             offset: tableParams.offset,
             columns: [],
@@ -93,11 +95,45 @@ const validateParameters = (tableParams) => {
             rows: [],
         }
 
-        return {invalidItems: invalidItems, table: table, isValid: true};;
+        return {invalidItems: invalidItems, table: table, isValid: true};
     }
 }
 
-const setAdminTable = () => {
+const setAdminTable = (columnsResponse) => {
+
+   let table;
+
+   if (columnsResponse.table.category.toLowerCase() === 'group') {
+
+        table = GroupModel;
+
+   } else if (columnsResponse.table.category.toLowerCase() === 'interface') {
+
+        table = InterfaceModel;
+
+   } else if (columnsResponse.table.category.toLowerCase() === 'item') {
+
+        table = ItemModel;
+
+   } else if (columnsResponse.table.category.toLowerCase() === 'object') {
+
+        table = ObjectModel;
+
+   } else if (columnsResponse.table.category.toLowerCase() === 'organization') {
+
+        table = OrganizationModel;
+
+   } else if (columnsResponse.table.category.toLowerCase() === 'system') {
+
+        table = SystemModel;
+
+   } else if (columnsResponse.table.category.toLowerCase() === 'user') {
+
+        table = UserModel;
+
+   }
+
+   return table
 
 }
 
