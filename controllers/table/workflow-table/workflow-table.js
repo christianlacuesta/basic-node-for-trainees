@@ -2,6 +2,7 @@
 const Configs = require('../../../models/admin-models/config-model/configs');
 const WorkflowDatas = require('../../../models/workflow-models/workflow-data');
 const WorkflowRecords = require('../../../models/workflow-models/workflow-record');
+const Shared = require('../../../controllers/table/shared/shared');
 const { Op, Sequelize } = require("sequelize");
 
 
@@ -90,28 +91,13 @@ const validateParameters = (tableParams) => {
 
 }
 
-/**************************
-* Common Filter function. *
-**************************/
-
-const commonFiltersFunction = (table) => {
-    const commonWhereFilters = { 
-        organizationId: table.organizationId,
-        systemId: table.systemId,
-        interfaceId: table.interfaceId,
-        name: table.name
-    };
-
-    return commonWhereFilters;
-}
-
 /***********************************************************************************************************
 * Function for getting the columns configuration of the table under config table with the column jsonData. *
 ***********************************************************************************************************/
 
 const getConfig = async(table) => {
 
-    const commonFilters = await commonFiltersFunction(table);
+    const commonFilters = await Shared.commonFiltersFunction(table);
 
     return Configs.findAll({
         where: commonFilters,
@@ -167,7 +153,7 @@ const getRows = async(columnsResponse, config) => {
         filterKeys.push(...objKeys);
     }
 
-    const commonFilters = await commonFiltersFunction(columnsResponse.table);
+    const commonFilters = await Shared.commonFiltersFunction(columnsResponse.table);
 
     let whereCondition = commonFilters;
 
@@ -208,7 +194,7 @@ const getRows = async(columnsResponse, config) => {
 
 const getWorkflowRecords = async(columnsResponse, recordIdList,  recordsArray) => {
 
-    let commonFilters = await commonFiltersFunction(columnsResponse.table);
+    let commonFilters = await Shared.commonFiltersFunction(columnsResponse.table);
     delete commonFilters.name;
 
     if (recordIdList.length > 0) { Object.assign(commonFilters, {recordId: recordIdList}) };
@@ -361,7 +347,7 @@ const workflowFilterAttributes = ['workflowDataId', 'recordId', 'interfaceId', '
 
 const getRecordDataString = async(columnsResponse, name, value) => {
 
-    let commonFilters = await commonFiltersFunction(columnsResponse.table);
+    let commonFilters = await Shared.commonFiltersFunction(columnsResponse.table);
     Object.assign(commonFilters, {name: name, value: {[Op.like]: Sequelize.literal('UPPER(' + '\'%'+ value +'%\'' + ')')}});
 
     return WorkflowDatas.findAll({
@@ -385,7 +371,7 @@ const getRecordDataString = async(columnsResponse, name, value) => {
 
 const getRecordDataDate = async(columnsResponse, name, from, to) => {
 
-    let commonFilters = await commonFiltersFunction(columnsResponse.table);
+    let commonFilters = await Shared.commonFiltersFunction(columnsResponse.table);
     Object.assign(commonFilters, {name: name});
 
     return WorkflowDatas.findAll({
