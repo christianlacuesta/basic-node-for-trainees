@@ -17,8 +17,8 @@ const table = {
     tableName: null,
     columns: [],
     filters: [],
-    limit: tableParams.limit,
-    offset: tableParams.offset,
+    limit: null,
+    offset: null,
     totalRows: null,
     rows: [],
 }

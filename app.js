@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const sequelize = require('./helpers/database');
 
 const workflowTableRoutes = require('./routes/table/workflow-table/workflow-table');
+const adminTableRoutes = require('./routes/table/admin-table/admin-table');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use((error, req, res, next) => {
 });
 
 app.use('/api/workflowtable', workflowTableRoutes);
+app.use('/api/admintable', adminTableRoutes);
 
 sequelize
 .sync()
