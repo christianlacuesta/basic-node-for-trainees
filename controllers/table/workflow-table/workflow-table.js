@@ -25,8 +25,11 @@ exports.getWorkflowTable = async(req, res, next) => {
         const rowsResponse = await getRows(columnsResponse, config);
 
         res.status(200).json(rowsResponse);
+
     } else {
+
         res.status(401).json({error: 'Invalid Parameters', invalidItems: validResponse.invalidItems});
+        
     }
 
 }
