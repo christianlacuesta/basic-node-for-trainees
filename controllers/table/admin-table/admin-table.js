@@ -1,5 +1,11 @@
 
-const Configs = require('../../../models/configs');
+const Configs = require('../../../models/admin-models/config-model/configs');
+
+/********************************************
+ * Below is the list of Admin Table Models. *
+ *******************************************/
+
+
 
 const table = {
     tableName: null,

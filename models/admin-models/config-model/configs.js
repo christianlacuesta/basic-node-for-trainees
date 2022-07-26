@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const sequelize = require('../helpers/database');
+const sequelize = require('../../../helpers/database');
 
 const Configs = sequelize.define('configs', {
     configId: {

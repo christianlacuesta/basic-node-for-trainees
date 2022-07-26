@@ -1,7 +1,7 @@
 
-const Configs = require('../../../models/configs');
-const WorkflowDatas = require('../../../models/workflow/workflow-data');
-const WorkflowRecords = require('../../../models/workflow/workflow-record');
+const Configs = require('../../../models/admin-models/config-model/configs');
+const WorkflowDatas = require('../../../models/workflow-models/workflow-data');
+const WorkflowRecords = require('../../../models/workflow-models/workflow-record');
 const { Op, Sequelize } = require("sequelize");
 
 
@@ -29,7 +29,7 @@ exports.getWorkflowTable = async(req, res, next) => {
     } else {
 
         res.status(401).json({error: 'Invalid Parameters', invalidItems: validResponse.invalidItems});
-        
+
     }
 
 }
