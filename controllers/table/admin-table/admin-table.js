@@ -99,7 +99,7 @@ const validateParameters = (tableParams) => {
     }
 }
 
-const setAdminTable = (columnsResponse) => {
+const setAdminTable = async(columnsResponse) => {
 
    let table;
 
@@ -133,10 +133,19 @@ const setAdminTable = (columnsResponse) => {
 
    }
 
-   table.findAndCountAll().then(workflowRecords => { console.log(workflowRecords) })
+   const rowResponse = await getRows(table, columnsResponse);
 
 }
 
-const getRows = () => {
+const getRows = (table, columnsResponse) => {
 
+    let filters = {}
+    console.log(columnsResponse.table)
+
+
+    // if (columnsResponse.filters.length > 0) {
+
+    // }
+
+    table.findAndCountAll({where: filters}).then(workflowRecords => { console.log(workflowRecords) })
 }
