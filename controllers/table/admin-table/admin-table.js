@@ -145,5 +145,12 @@ const getRows = (table, columnsResponse) => {
 
     }
 
-    table.findAndCountAll({where: filters}).then(workflowRecords => { console.log(workflowRecords) })
+    table.findAndCountAll({where: filters}).then(workflowRecords => { 
+        console.log(workflowRecords) 
+    });
+
+}
+
+const setFilters = () => {
+    
 }

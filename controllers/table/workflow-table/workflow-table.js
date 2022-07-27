@@ -193,6 +193,7 @@ const getWorkflowRecords = async(columnsResponse, recordIdList,  recordsArray) =
         }
 
     }
+    
     return WorkflowRecords.findAndCountAll({
         where: commonFilters,
         limit: columnsResponse.table.limit,
