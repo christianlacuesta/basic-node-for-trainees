@@ -32,7 +32,7 @@ exports.getAdminTable = async(req, res, next) => {
 
         const tableResponse = await setAdminTable(columnsResponse);
 
-        res.status(200).json(columnsResponse);
+        res.status(200).json(tableResponse);
 
     } else {
 
@@ -101,6 +101,8 @@ const validateParameters = (tableParams) => {
 
 const setAdminTable = async(columnsResponse) => {
 
+    const columnsResponseCopy = JSON.parse(JSON.stringify(columnsResponse));
+
    let table;
 
    if (columnsResponse.table.category.toLowerCase() === 'group') {
@@ -135,16 +137,18 @@ const setAdminTable = async(columnsResponse) => {
 
    const rowResponse = await getRows(table, columnsResponse);
 
+   Object.assign(columnsResponseCopy.table, {totalRows: rowResponse.count, rows: rowResponse.rows});
+
+   return columnsResponseCopy;
+
 }
 
 const getRows = async(table, columnsResponse) => {
 
     const filters = await setFilters(columnsResponse);
 
-    //console.log(filters);
-
-    table.findAndCountAll({where: filters}).then(workflowRecords => { 
-        console.log(workflowRecords.rows) 
+    return table.findAndCountAll({where: filters}).then(workflowRecords => { 
+        return workflowRecords
     });
 
 }
@@ -154,8 +158,6 @@ const setFilters = (columnsResponse) => {
     let filters = {};
 
     if (columnsResponse.table.filters.length > 0) {
-
-
 
         for (let i = 0; columnsResponse.table.filters.length > i; i++) {
 
@@ -175,7 +177,7 @@ const setFilters = (columnsResponse) => {
 
             } else if (type === 'array') {
 
-                console.log(columnsResponse.table.filters[i][key[0]].arrayFilter)
+                Object.assign(filters, {[key[0]]: {name: columnsResponse.table.filters[i][key[0]].arrayFilter.name}});
                 
             }
 
