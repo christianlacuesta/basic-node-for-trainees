@@ -42,6 +42,10 @@ exports.getAdminTable = async(req, res, next) => {
 
 }
 
+/********************************************************************************************
+ * Validate required parameters and return a json response of the required item if invalid. *
+ *******************************************************************************************/
+
 const validateParameters = (tableParams) => {
 
     let invalidItems = [];
@@ -99,6 +103,10 @@ const validateParameters = (tableParams) => {
     }
 }
 
+/********************************************************
+ * Function to set the model by user defined parameter. *
+ *******************************************************/
+
 const setAdminTable = async(columnsResponse) => {
 
     const columnsResponseCopy = JSON.parse(JSON.stringify(columnsResponse));
@@ -143,15 +151,23 @@ const setAdminTable = async(columnsResponse) => {
 
 }
 
+/***************************************************************
+ * Accepts columnsResponse then outputs the rows of the model. *
+ **************************************************************/
+
 const getRows = async(table, columnsResponse) => {
 
     const filters = await setFilters(columnsResponse);
 
-    return table.findAndCountAll({where: filters}).then(workflowRecords => { 
-        return workflowRecords
+    return table.findAndCountAll({where: filters}).then(records => { 
+        return records
     });
 
 }
+
+/*******************************************************************
+ * Sets the filter if there are any and returns the filter object. *
+ ******************************************************************/
 
 const setFilters = (columnsResponse) => {
 
