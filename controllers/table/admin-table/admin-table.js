@@ -139,13 +139,11 @@ const setAdminTable = async(columnsResponse) => {
 
 const getRows = (table, columnsResponse) => {
 
-    let filters = {}
-    console.log(columnsResponse.table)
+    let filters = {};
 
+    if (columnsResponse.table.filters.length > 0) {
 
-    // if (columnsResponse.filters.length > 0) {
-
-    // }
+    }
 
     table.findAndCountAll({where: filters}).then(workflowRecords => { console.log(workflowRecords) })
 }
