@@ -141,10 +141,10 @@ const getRows = async(table, columnsResponse) => {
 
     const filters = await setFilters(columnsResponse);
 
-    console.log(filters);
+    //console.log(filters);
 
     table.findAndCountAll({where: filters}).then(workflowRecords => { 
-        //console.log(workflowRecords) 
+        console.log(workflowRecords.rows) 
     });
 
 }
@@ -171,7 +171,7 @@ const setFilters = (columnsResponse) => {
 
             } else if (type === 'date') {
 
-                console.log(value)
+                Object.assign(filters, {[key[0]]: {[Op.between]: [value.dateFrom, value.dateTo]}});
 
             } else if (type === 'array') {
 
