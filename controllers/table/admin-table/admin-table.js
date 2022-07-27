@@ -90,7 +90,7 @@ const validateParameters = (tableParams) => {
             limit: tableParams.limit,
             offset: tableParams.offset,
             columns: [],
-            filters: [],
+            filters: tableParams.filters,
             totalRows: null,
             rows: [],
         }
@@ -137,20 +137,52 @@ const setAdminTable = async(columnsResponse) => {
 
 }
 
-const getRows = (table, columnsResponse) => {
+const getRows = async(table, columnsResponse) => {
+
+    const filters = await setFilters(columnsResponse);
+
+    console.log(filters);
+
+    table.findAndCountAll({where: filters}).then(workflowRecords => { 
+        //console.log(workflowRecords) 
+    });
+
+}
+
+const setFilters = (columnsResponse) => {
 
     let filters = {};
 
     if (columnsResponse.table.filters.length > 0) {
 
+
+
+        for (let i = 0; columnsResponse.table.filters.length > i; i++) {
+
+            const key = Object.keys(columnsResponse.table.filters[i]);
+
+            const type = columnsResponse.table.filters[i][key[0]].type;
+
+            const value = columnsResponse.table.filters[i][key[0]].value;
+
+            if (type === 'text') {
+
+                Object.assign(filters, {[key[0]]: {[Op.like]: Sequelize.literal('UPPER(' + '\'%'+ value +'%\'' + ')')}});
+
+            } else if (type === 'date') {
+
+                console.log(value)
+
+            } else if (type === 'array') {
+
+                console.log(columnsResponse.table.filters[i][key[0]].arrayFilter)
+                
+            }
+
+        }
+
     }
 
-    table.findAndCountAll({where: filters}).then(workflowRecords => { 
-        console.log(workflowRecords) 
-    });
+    return filters;
 
-}
-
-const setFilters = () => {
-    
 }
