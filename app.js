@@ -6,6 +6,8 @@ const sequelize = require('./helpers/database');
 const workflowTableRoutes = require('./routes/table/workflow-table/workflow-table');
 const adminTableRoutes = require('./routes/table/admin-table/admin-table');
 
+const workflowFormRoutes = require('./routes/form/workflow-form/workflow-form');
+
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'files')));
@@ -32,6 +34,8 @@ app.use((error, req, res, next) => {
 
 app.use('/api/workflowtable', workflowTableRoutes);
 app.use('/api/admintable', adminTableRoutes);
+
+app.use('/api/workflowform', workflowFormRoutes);
 
 sequelize
 .sync()
