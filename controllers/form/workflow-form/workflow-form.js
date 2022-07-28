@@ -11,7 +11,7 @@ exports.getWorkflowForm = async(req, res, next) => {
 
         const step = await getSteps(validResponse);
 
-        console.log('xxxx')
+
 
         res.status(200).json(validResponse);
 
@@ -67,7 +67,19 @@ const validateParameters = (formParams) => {
 
 const getSteps = (validResponse) => {
 
-    
+    const validResponseCopy = JSON.parse(JSON.stringify(validResponse));
+
+    return Steps.findAll({where: {
+        organizationId: validResponse.form.organizationId, 
+        systemId: validResponse.form.systemId,
+        interfaceId: validResponse.form.interfaceId,
+    }})
+    .then(steps => {
+        //res.status(200).json(steps);
+    })
+    .catch(err => {
+        return {recordIdList: recordIdList, records: workflowDatas, error: null};
+    });
 
 }
  
