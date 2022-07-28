@@ -76,6 +76,8 @@ const getSteps = (validResponse) => {
     }})
     .then(steps => {
         //res.status(200).json(steps);
+
+        console.log(steps);
     })
     .catch(err => {
         return {recordIdList: recordIdList, records: workflowDatas, error: null};
