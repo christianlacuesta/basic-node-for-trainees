@@ -86,8 +86,6 @@ exports.getWorkflowForm = async(req, res, next) => {
 
         const step = await getSteps(validResponse);
 
-        const item = await getItems(step);
-
         res.status(200).json(step);
 
     } else {
@@ -167,26 +165,54 @@ const getSteps = async(validResponse) => {
     validResponseCopy.form.steps = [];
 
     for (let i = 0; steps.length > i; i++) {
+
         const stepData = steps[i];
-        validResponseCopy.form.steps.push({stepData: stepData, items: [
-            {
-                itemData: itemData,
-                objects: [objectData]
-            }
-        ]});
+
+        const items = await getItems(stepData);
+
+        validResponseCopy.form.steps.push({stepData: stepData, items: items});
     }
 
     return validResponseCopy;
 
 }
  
-const getItems = (step) => {
+const getItems = async(stepData) => {
 
-    const stepCopy = JSON.parse(JSON.stringify(step));
+    const stepCopy = JSON.parse(JSON.stringify(stepData));
 
-    
+    const itemsResponse = await Items.findAll({where: {
+        organizationId: stepCopy.organizationId, 
+        systemId: stepCopy.systemId,
+        interfaceId: stepCopy.interfaceId,
+        stepId: stepCopy.stepId
+    }})
+    .then(items => {
+        return items;
+    })
+    .catch(err => {
+        return {recordIdList: recordIdList, records: workflowDatas, error: null};
+    });
+
+    let items = [];
+
+    for (let i = 0; itemsResponse.length > i; i++) {
+
+        const itemData = itemsResponse[i];
+
+        const objects = await getObjects(itemData);
+
+        items.push({itemData: itemData, objects: []});
+    };
+
+
+    return items;
+
 }
 
-const getObjects = () => {
+const getObjects = async(itemData) => {
+
+    const itemCopy = JSON.parse(JSON.stringify(itemData));
     
+    console.log()
 }
