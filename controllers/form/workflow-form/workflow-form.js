@@ -55,11 +55,19 @@ const validateParameters = (formParams) => {
             organizationId: formParams.organizationId, 
             systemId: formParams.systemId,
             interfaceId: formParams.interfaceId,
-            stepId: null,
-            recordId: null,
-            step: null,
-            items: null,
-            objects: null
+            stepId: formParams.stepId,
+            recordId: formParams.recordId,
+            step: {
+                stepData: {},
+                items: [
+                    {
+                        itemData: {},
+                        objects: [{
+
+                        }]
+                    }
+                ],
+            }
         }
 
         return {invalidItems: invalidItems, form: form, isValid: true};;
