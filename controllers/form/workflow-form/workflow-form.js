@@ -150,11 +150,13 @@ const getSteps = async(validResponse) => {
 
     const validResponseCopy = JSON.parse(JSON.stringify(validResponse));
 
-    const steps = await Steps.findAll({where: {
-        organizationId: validResponse.form.organizationId, 
-        systemId: validResponse.form.systemId,
-        interfaceId: validResponse.form.interfaceId,
-    }})
+    const steps = await Steps.findAll({
+        where: {
+            organizationId: validResponse.form.organizationId, 
+            systemId: validResponse.form.systemId,
+            interfaceId: validResponse.form.interfaceId,
+        }
+    })
     .then(steps => {
         return steps;
     })
@@ -181,12 +183,14 @@ const getItems = async(stepData) => {
 
     const stepCopy = JSON.parse(JSON.stringify(stepData));
 
-    const itemsResponse = await Items.findAll({where: {
-        organizationId: stepCopy.organizationId, 
-        systemId: stepCopy.systemId,
-        interfaceId: stepCopy.interfaceId,
-        stepId: stepCopy.stepId
-    }})
+    const itemsResponse = await Items.findAll({
+        where: {
+            organizationId: stepCopy.organizationId, 
+            systemId: stepCopy.systemId,
+            interfaceId: stepCopy.interfaceId,
+            stepId: stepCopy.stepId
+        }
+    })
     .then(items => {
         return items;
     })
@@ -214,10 +218,12 @@ const getObjects = async(itemData) => {
 
     const itemCopy = JSON.parse(JSON.stringify(itemData));
 
-    const objectsResponse = await Objects.findAll({where: {
-        organizationId: itemCopy.organizationId, 
-        objectId: itemCopy.value.objectId,
-    }})
+    const objectsResponse = await Objects.findAll({
+        where: {
+            organizationId: itemCopy.organizationId, 
+            objectId: itemCopy.value.objectId,
+        }
+    })
     .then(objects => {
         return objects;
     })
@@ -243,10 +249,12 @@ const getSubChoices = async(objectData) => {
 
     const objectDataCopy = JSON.parse(JSON.stringify(objectData));
 
-    const choicesResponse = await Objects.findAll({where: {
-        organizationId: objectDataCopy.organizationId, 
-        objectParentId: objectDataCopy.objectId,
-    }})
+    const choicesResponse = await Objects.findAll({
+        where: {
+            organizationId: objectDataCopy.organizationId, 
+            objectParentId: objectDataCopy.objectId,
+        }
+    })
     .then(objects => {
         return objects;
     })

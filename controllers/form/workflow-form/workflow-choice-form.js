@@ -1,14 +1,14 @@
 const Objects = require('../../../models/object-models/object');
 
-exports.getWorkflowObjectForm = async(req, res, next) => {
+exports.getWorkflowChoiceForm = async(req, res, next) => {
 
     const validResponse = await validateParameters(req.body);
 
     if (validResponse.isValid) {
 
-        const object = await getObjects(validResponse);
+        const choice = await getSubChoices(validResponse);
 
-        res.status(200).json(object);
+        res.status(200).json(choice);
 
     } else {
 
@@ -53,7 +53,7 @@ const validateParameters = (formParams) => {
             stepId: formParams.stepId,
             objectId: formParams.objectId,
             recordId: formParams.recordId,
-            objects: []
+            choices: []
         }
 
         return {invalidItems: invalidItems, form: form, isValid: true};;
@@ -61,31 +61,36 @@ const validateParameters = (formParams) => {
 
 }
 
-const getObjects = async(itemData) => {
+const getSubChoices = async(objectData) => {
 
-    const itemCopy = JSON.parse(JSON.stringify(itemData));
+    const choicesDataCopy = JSON.parse(JSON.stringify(objectData));
 
-    const objectsResponse = await Objects.findAll({
+    const choicesResponse = await Objects.findAll({
         where: {
-            organizationId: itemCopy.form.organizationId, 
-            objectId: itemCopy.form.objectId,
+            organizationId: choicesDataCopy.organizationId? choicesDataCopy.organizationId : choicesDataCopy.form.organizationId, 
+            objectParentId: choicesDataCopy.objectId? choicesDataCopy.objectId : choicesDataCopy.form.objectId,
         }
     })
-    .then(objects => {
-        return objects;
+    .then(choices => {
+        return choices;
     })
     .catch(err => {
         return {error: err};
     });
 
-    let objects = [];
+    let choices = [];
 
-    for (let i = 0; objectsResponse.length > i; i++) {
+    if (choicesResponse.length > 0) {
+        for (let i = 0; choicesResponse.length > i; i++) {
 
-        const objectData = objectsResponse[i];
-
-        objects.push({objectData: objectData, choices: []});
+            const choicesData = choicesResponse[i];
+    
+            choices.push({choicesData: choicesData, choices: []});
+        }
+    
+    
+        choicesDataCopy.form.choices = choices;
     }
-
-    return objects;
+    
+    return choicesDataCopy;
 }

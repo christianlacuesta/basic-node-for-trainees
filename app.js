@@ -7,7 +7,6 @@ const workflowTableRoutes = require('./routes/table/workflow-table/workflow-tabl
 const adminTableRoutes = require('./routes/table/admin-table/admin-table');
 
 const workflowFormRoutes = require('./routes/form/workflow-form/workflow-form');
-const workflowStepFormRoutes = require('./routes/form/workflow-form/workflow-step-form');
 
 const app = express();
 
@@ -37,7 +36,6 @@ app.use('/api/workflowtable', workflowTableRoutes);
 app.use('/api/admintable', adminTableRoutes);
 
 app.use('/api/workflowform', workflowFormRoutes);
-app.use('/api/workflowstepform', workflowStepFormRoutes);
 
 sequelize
 .sync()
