@@ -50,7 +50,32 @@ const itemData = {
     updatedAt: null
 };
 
-const objectData = {};
+const objectData = {
+    objectId: null,
+    objectParentId: null,
+    level: null,
+    itemId: null,
+    organizationId: null,
+    name: null,
+    description: null,
+    label: null,
+    value: null,
+    type: null,
+    comment: null,
+    commentType: null,
+    choices: null,
+    isMultiple: null,
+    defaultSelected: null,
+    isRequired: null,
+    isSelected: null,
+    config: null,
+    createdById: null,
+    createdByName: null,
+    updatedById: null,
+    updatedByName: null,
+    createdAt: null,
+    updatedAt: null
+};
 
 
 exports.getWorkflowForm = async(req, res, next) => {
@@ -61,9 +86,9 @@ exports.getWorkflowForm = async(req, res, next) => {
 
         const step = await getSteps(validResponse);
 
+        const item = await getItems(step);
 
-
-        res.status(200).json(validResponse);
+        res.status(200).json(step);
 
     } else {
 
@@ -107,21 +132,15 @@ const validateParameters = (formParams) => {
             interfaceId: formParams.interfaceId,
             stepId: formParams.stepId,
             recordId: formParams.recordId,
-            step: {
-                stepData: {
-
-                },
+            steps: [{
+                stepData: stepData,
                 items: [
                     {
-                        itemData: {
-
-                        },
-                        objects: [{
-
-                        }]
+                        itemData: itemData,
+                        objects: [objectData]
                     }
                 ],
-            }
+            }]
         }
 
         return {invalidItems: invalidItems, form: form, isValid: true};;
@@ -129,28 +148,43 @@ const validateParameters = (formParams) => {
 
 }
 
-const getSteps = (validResponse) => {
+const getSteps = async(validResponse) => {
 
     const validResponseCopy = JSON.parse(JSON.stringify(validResponse));
 
-    return Steps.findAll({where: {
+    const steps = await Steps.findAll({where: {
         organizationId: validResponse.form.organizationId, 
         systemId: validResponse.form.systemId,
         interfaceId: validResponse.form.interfaceId,
     }})
     .then(steps => {
-        //res.status(200).json(steps);
-
-        console.log(steps);
+        return steps;
     })
     .catch(err => {
         return {recordIdList: recordIdList, records: workflowDatas, error: null};
     });
 
+    validResponseCopy.form.steps = [];
+
+    for (let i = 0; steps.length > i; i++) {
+        const stepData = steps[i];
+        validResponseCopy.form.steps.push({stepData: stepData, items: [
+            {
+                itemData: itemData,
+                objects: [objectData]
+            }
+        ]});
+    }
+
+    return validResponseCopy;
+
 }
  
-const getItems = () => {
+const getItems = (step) => {
 
+    const stepCopy = JSON.parse(JSON.stringify(step));
+
+    
 }
 
 const getObjects = () => {
