@@ -202,7 +202,7 @@ const getItems = async(stepData) => {
 
         const objects = await getObjects(itemData);
 
-        items.push({itemData: itemData, objects: []});
+        items.push({itemData: itemData, objects: objects});
     };
 
 
@@ -216,17 +216,24 @@ const getObjects = async(itemData) => {
 
     const objectsResponse = await Objects.findAll({where: {
         organizationId: itemCopy.organizationId, 
-        systemId: itemCopy.systemId,
-        interfaceId: itemCopy.interfaceId,
-        stepId: itemCopy.stepId,
-        itemId: itemCopy.stepId,
+        objectId: itemCopy.value.objectId,
     }})
     .then(objects => {
         return objects;
     })
     .catch(err => {
-        return {recordIdList: recordIdList, records: workflowDatas, error: null};
+        return {error: err};
     });
 
-    console.log(objectsResponse)
+    let objects = [];
+
+    for (let i = 0; objectsResponse.length > i; i++) {
+        console.log(objectsResponse[i])
+    }
+
+    return objects;
+}
+
+const getSubChoices = () => {
+    
 }
