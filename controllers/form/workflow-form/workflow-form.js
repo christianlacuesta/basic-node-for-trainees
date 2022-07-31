@@ -213,6 +213,20 @@ const getItems = async(stepData) => {
 const getObjects = async(itemData) => {
 
     const itemCopy = JSON.parse(JSON.stringify(itemData));
-    
-    console.log()
+
+    const objectsResponse = await Objects.findAll({where: {
+        organizationId: itemCopy.organizationId, 
+        systemId: itemCopy.systemId,
+        interfaceId: itemCopy.interfaceId,
+        stepId: itemCopy.stepId,
+        itemId: itemCopy.stepId,
+    }})
+    .then(objects => {
+        return objects;
+    })
+    .catch(err => {
+        return {recordIdList: recordIdList, records: workflowDatas, error: null};
+    });
+
+    console.log(objectsResponse)
 }
