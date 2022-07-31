@@ -228,12 +228,42 @@ const getObjects = async(itemData) => {
     let objects = [];
 
     for (let i = 0; objectsResponse.length > i; i++) {
-        console.log(objectsResponse[i])
+
+        const objectData = objectsResponse[i];
+
+        const choices = await getSubChoices(objectData);
+
+        objects.push({objectData: objectData, choices: choices});
     }
 
     return objects;
 }
 
-const getSubChoices = () => {
-    
+const getSubChoices = async(objectData) => {
+
+    const objectDataCopy = JSON.parse(JSON.stringify(objectData));
+
+    const choicesResponse = await Objects.findAll({where: {
+        organizationId: objectDataCopy.organizationId, 
+        objectParentId: objectDataCopy.objectId,
+    }})
+    .then(objects => {
+        return objects;
+    })
+    .catch(err => {
+        return {error: err};
+    });
+
+    let choices = [];
+
+    for (let i = 0; choicesResponse.length > i; i++) {
+
+        const choicesData = choicesResponse[i];
+
+        const subChoices = await getSubChoices(choicesResponse[i]);
+
+        choices.push({choicesData: choicesData, choices: subChoices});
+    }
+
+    return choices;
 }
