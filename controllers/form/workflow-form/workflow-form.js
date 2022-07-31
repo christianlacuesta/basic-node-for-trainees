@@ -28,7 +28,27 @@ const stepData = {
     updatedAt: null
 };
 
-const itemData = {};
+const itemData = {
+    itemId: null,
+    stepId: null,
+    interfaceId: null,
+    systemId: null,
+    organizationId: null,
+    name: null,
+    description: null,
+    value: null,
+    type: null,
+    level: null,
+    position: null,
+    width: null,
+    config: null,
+    createdById: null,
+    createdByName: null,
+    updatedById: null,
+    updatedByName: null,
+    createdAt: null,
+    updatedAt: null
+};
 
 const objectData = {};
 
@@ -94,7 +114,6 @@ const validateParameters = (formParams) => {
                 items: [
                     {
                         itemData: {
-                            itemId: null,
 
                         },
                         objects: [{
