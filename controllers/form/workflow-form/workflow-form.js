@@ -3,6 +3,36 @@ const Items = require('../../../models/item-models/item');
 const Objects = require('../../../models/object-models/object');
 
 
+const stepData = {
+    recordId: null,
+    interfaceId: null,
+    systemId: null,
+    organizationId: null,
+    activeStep: null,
+    lastActiveStep: null,
+    stepStatus: null,
+    fileStatus: null,
+    isEmployee: null,
+    isSupervisor: null,
+    isManager: null,
+    isSubmitted: null,
+    jsonData: null,
+    fileData: null,
+    objectData: null,
+    deleteFlag: null,
+    createdById: null,
+    createdByName: null,
+    updatedById: null,
+    updatedByName: null,
+    createdAt: null,
+    updatedAt: null
+};
+
+const itemData = {};
+
+const objectData = {};
+
+
 exports.getWorkflowForm = async(req, res, next) => {
 
     const validResponse = await validateParameters(req.body);
@@ -59,34 +89,13 @@ const validateParameters = (formParams) => {
             recordId: formParams.recordId,
             step: {
                 stepData: {
-                    recordId: null,
-                    interfaceId: null,
-                    systemId: null,
-                    organizationId: null,
-                    activeStep: null,
-                    lastActiveStep: null,
-                    stepStatus: null,
-                    fileStatus: null,
-                    isEmployee: null,
-                    isSupervisor: null,
-                    isManager: null,
-                    isSubmitted: null,
-                    jsonData: null,
-                    fileData: null,
-                    objectData: null,
-                    deleteFlag: null,
-                    createdById: null,
-                    createdByName: null,
-                    updatedById: null,
-                    updatedByName: null,
-                    createdAt: null,
-                    updatedAt: null
+
                 },
                 items: [
                     {
                         itemData: {
                             itemId: null,
-                            
+
                         },
                         objects: [{
 
