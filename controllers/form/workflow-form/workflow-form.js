@@ -58,10 +58,36 @@ const validateParameters = (formParams) => {
             stepId: formParams.stepId,
             recordId: formParams.recordId,
             step: {
-                stepData: {},
+                stepData: {
+                    recordId: null,
+                    interfaceId: null,
+                    systemId: null,
+                    organizationId: null,
+                    activeStep: null,
+                    lastActiveStep: null,
+                    stepStatus: null,
+                    fileStatus: null,
+                    isEmployee: null,
+                    isSupervisor: null,
+                    isManager: null,
+                    isSubmitted: null,
+                    jsonData: null,
+                    fileData: null,
+                    objectData: null,
+                    deleteFlag: null,
+                    createdById: null,
+                    createdByName: null,
+                    updatedById: null,
+                    updatedByName: null,
+                    createdAt: null,
+                    updatedAt: null
+                },
                 items: [
                     {
-                        itemData: {},
+                        itemData: {
+                            itemId: null,
+                            
+                        },
                         objects: [{
 
                         }]
