@@ -15,11 +15,7 @@ const Employee = sequelize.define('employee', {
     job: {
         type: Sequelize.STRING,
         allowNull: false,
-    },
-    comments: {
-        type: Sequelize.JSON,
-        allowNull: false,
-    },
+    }
 });
 
 module.exports = Employee;
