@@ -2,7 +2,7 @@ const Employee = require('../models/employee');
 
 exports.getEmployees = (req, res, next) => {
     let newAtt = req.body.attributes;
-    
+    this.employee.getDocuments(xx)
     Employee.findAll({
         order: [ [ 'updatedAt', 'DESC' ]],
     })
