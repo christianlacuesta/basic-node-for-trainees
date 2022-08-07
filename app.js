@@ -3,10 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const sequelize = require('./helpers/database');
 
-const workflowTableRoutes = require('./routes/table/workflow-table/workflow-table');
-const adminTableRoutes = require('./routes/table/admin-table/admin-table');
-
-const workflowFormRoutes = require('./routes/form/workflow-form/workflow-form');
+const employeeRoutes = require('./routes/employee');
 
 const app = express();
 
@@ -32,15 +29,12 @@ app.use((error, req, res, next) => {
     res.status(status).json({ message: message, data: data });
 });
 
-app.use('/api/workflowtable', workflowTableRoutes);
-app.use('/api/admintable', adminTableRoutes);
-
-app.use('/api/workflowform', workflowFormRoutes);
+app.use('/api/employee', employeeRoutes);
 
 sequelize
 .sync()
 .then(result => {
-    app.listen(9000);
+    app.listen(3000);
 })
 .catch(err => {
     console.log(err);
